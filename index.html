@@ -397,30 +397,6 @@
       }
     }
     
-    function calculateDaysRemaining(birthday) {
-      const [month, day] = birthday.split('/').map(Number);
-      
-      // Convert Jalali to Gregorian for calculation
-      // This is a simplified approximation - for production use a proper Jalali library
-      const now = new Date();
-      const currentYear = now.getFullYear();
-      
-      // Create a Gregorian date for the birthday in current year
-      // Note: This is approximate - proper conversion requires a Jalali calendar library
-      const gregBirthday = new Date(currentYear, month - 1, day);
-      
-      // If birthday has already passed this year, use next year
-      if (gregBirthday < now) {
-        gregBirthday.setFullYear(currentYear + 1);
-      }
-      
-      // Calculate difference in days
-      const diffTime = gregBirthday - now;
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      
-      return diffDays;
-    }
-    
     function renderBirthdays(birthdays) {
       birthdaysList.innerHTML = '';
       
@@ -434,7 +410,6 @@
       birthdays.forEach((bday, index) => {
         const [month, day] = bday.birthday.split('/');
         const monthName = persianMonths[parseInt(month) - 1];
-        const daysRemaining = calculateDaysRemaining(bday.birthday);
         
         const item = document.createElement('div');
         item.className = 'swipe-action mb-2';
@@ -448,7 +423,7 @@
             <div class="mr-3 flex-1 text-right">
               <div class="flex items-center">
                 <h3 class="text-sm font-medium">${bday.name}</h3>
-                <span class="days-remaining">${daysRemaining} روز باقی مانده</span>
+                <span class="days-remaining">${bday.days_remaining} روز باقی مانده</span>
               </div>
               <p class="text-sm" style="color: var(--tg-theme-hint-color);">${day} ${monthName}</p>
             </div>
