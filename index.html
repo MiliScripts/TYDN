@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="fa" dir="rtl" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <title>یادآور تولد دوستان</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
     @font-face {
@@ -14,382 +18,183 @@
       font-weight: normal;
       font-style: normal;
     }
-    
-    :root {
-      --tg-theme-bg-color: #ffffff;
-      --tg-theme-text-color: #000000;
-      --tg-theme-hint-color: #707579;
-      --tg-theme-link-color: #3390ec;
-      --tg-theme-button-color: #3390ec;
-      --tg-theme-button-text-color: #ffffff;
-      --tg-theme-secondary-bg-color: #f4f4f5;
-    }
-    
+
     body {
       font-family: 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--tg-theme-bg-color);
-      color: var(--tg-theme-text-color);
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
     }
-    
-    .drawer {
+
+    /* Drawer animation styles */
+    .drawer-side {
       transform: translateY(100%);
       transition: transform 0.3s ease-out;
+      will-change: transform;
     }
-    
-    .drawer.open {
+
+    .drawer-open .drawer-side {
       transform: translateY(0);
     }
     
-    .backdrop {
+    .drawer-overlay {
+      background-color: rgba(0, 0, 0, 0.5);
       opacity: 0;
+      transition: opacity 0.3s ease-out;
       pointer-events: none;
-      transition: opacity 0.3s ease;
     }
-    
-    .backdrop.open {
+
+    .drawer-open .drawer-overlay {
       opacity: 1;
-      pointer-events: all;
+      pointer-events: auto;
     }
-    
-    .birthday-item {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
-    }
-    
-    .birthday-item.removing {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    
-    .empty-state {
-      color: var(--tg-theme-hint-color);
-    }
-    
-    input:focus, select:focus {
-      outline: none;
-    }
-    
-    .days-remaining {
-      background-color: var(--tg-theme-secondary-bg-color);
-      color: var(--tg-theme-link-color);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 12px;
-      margin-right: 8px;
-    }
-    
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 12px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      transform: translateX(150%);
-      transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-    }
-    
-    .notification.show {
-      transform: translateX(0);
-    }
-    
-    .notification.success {
-      background-color: #4CAF50;
-      color: white;
-    }
-    
-    .notification.error {
-      background-color: #F44336;
-      color: white;
-    }
-    
-    .notification.warning {
-      background-color: #FF9800;
-      color: white;
-    }
-    
-    .notification-icon {
-      margin-left: 8px;
-    }
-    
-    .month-section {
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    }
-    
-    .month-header {
-      padding: 14px 16px;
-      background-color: var(--tg-theme-secondary-bg-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .month-header:hover {
-      background-color: rgba(0, 0, 0, 0.03);
-    }
-    
-    .month-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-    }
-    
-    .month-content.open {
-      max-height: 1000px;
-    }
-    
-    .month-badge {
-      background-color: var(--tg-theme-button-color);
-      color: white;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 12px;
-    }
-    
-    .birthday-card {
-      padding: 14px 16px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      display: flex;
-      align-items: center;
-      transition: background-color 0.2s;
-    }
-    
-    .birthday-card:last-child {
-      border-bottom: none;
-    }
-    
-    .birthday-card:hover {
-      background-color: rgba(0, 0, 0, 0.02);
-    }
-    
-    .birthday-avatar {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: var(--tg-theme-secondary-bg-color);
-      color: var(--tg-theme-link-color);
-      margin-left: 12px;
-      flex-shrink: 0;
-    }
-    
-    .birthday-info {
-      flex-grow: 1;
-    }
-    
-    .birthday-date {
-      font-size: 13px;
-      color: var(--tg-theme-hint-color);
-      margin-top: 4px;
-    }
-    
-    .birthday-actions {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .btn-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .btn-icon:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-    
-    .btn-delete {
-      color: #f44336;
-    }
-    
-    .current-month {
-      background-color: rgba(51, 144, 236, 0.1);
-    }
-    
-    .today-badge {
-      background-color: #4CAF50;
-      color: white;
-      padding: 2px 8px;
-      border-radius: 8px;
-      font-size: 11px;
-      margin-right: 6px;
-    }
-    
-    /* Custom scrollbar */
+
+    /* Custom scrollbar for better aesthetics */
     ::-webkit-scrollbar {
       width: 6px;
     }
-    
     ::-webkit-scrollbar-track {
       background: rgba(0, 0, 0, 0.05);
       border-radius: 10px;
     }
-    
     ::-webkit-scrollbar-thumb {
       background: rgba(0, 0, 0, 0.2);
       border-radius: 10px;
     }
-    
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(0, 0, 0, 0.3);
     }
+
+    /* Additional style to make collapse icon smoother */
+    .collapse-title .fa-chevron-down {
+        transition: transform 0.2s ease-in-out;
+    }
+    .collapse-open .collapse-title .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+
   </style>
 </head>
-<body class="relative">
-  <div class="max-w-md mx-auto pb-20">
-    <div class="px-4 py-3 sticky top-0 z-10" style="background-color: var(--tg-theme-bg-color);">
+<body class="bg-base-100 text-base-content">
+  <div class="max-w-md mx-auto pb-24">
+    <div class="px-4 py-3 sticky top-0 z-10 bg-base-100/80 backdrop-blur-sm border-b border-base-200">
       <h1 class="text-xl font-semibold text-right">یادآور تولد دوستان</h1>
     </div>
-    
-    <div id="birthdaysList" class="px-4">
-      <!-- Birthdays will be loaded here -->
-      <div class="py-8 text-center empty-state">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: var(--tg-theme-hint-color);">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+    <div id="birthdaysList" class="p-4 space-y-3">
+      <!-- Empty State -->
+      <div class="py-12 text-center text-base-content/50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <p class="mt-2">هنوز تولدی اضافه نکرده‌اید</p>
+        <p class="mt-2 text-sm">هنوز تولدی اضافه نکرده‌اید</p>
       </div>
     </div>
-    
-    <div id="status" class="px-4 py-2 text-center"></div>
-    
-    <div class="fixed bottom-0 left-0 right-0 p-4" style="background-color: var(--tg-theme-bg-color);">
-      <button id="addButton" class="w-full py-3 px-4 rounded-lg font-medium flex items-center justify-center gap-2" style="color: var(--tg-theme-button-text-color); background-color: var(--tg-theme-button-color);">
-        <i class="fas fa-plus"></i>
-        افزودن تولد
-      </button>
+
+    <!-- Floating Add Button -->
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-transparent">
+       <div class="max-w-md mx-auto">
+          <button id="addButton" class="btn btn-primary w-full shadow-lg">
+            <i class="fas fa-plus"></i>
+            افزودن تولد
+          </button>
+       </div>
     </div>
   </div>
-  
-  <!-- Notification -->
-  <div id="notification" class="notification">
-    <span id="notificationMessage"></span>
-    <span class="notification-icon">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-      </svg>
-    </span>
-  </div>
-  
-  <!-- Drawer for adding new birthdays -->
-  <div id="backdrop" class="backdrop fixed inset-0 bg-black bg-opacity-50 z-20"></div>
-  
-  <div id="drawer" class="drawer fixed bottom-0 left-0 right-0 rounded-t-2xl z-30 p-4 max-h-[90vh] overflow-y-auto" style="background-color: var(--tg-theme-bg-color);">
-    <div class="flex flex-row-reverse justify-between items-center mb-4">
-      <h2 class="text-lg font-semibold">افزودن تولد جدید</h2>
-      <button id="closeDrawer" class="text-gray-500 btn-icon">
-        <i class="fas fa-times"></i>
-      </button>
+
+  <!-- Notification Toasts Container -->
+  <div id="notification-container" class="toast toast-bottom toast-center z-50"></div>
+
+  <!-- Drawer (Add Birthday Form) -->
+  <div id="addBirthdayDrawer" class="drawer drawer-bottom h-auto z-40">
+    <input id="drawer-checkbox" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-side">
+      <label for="drawer-checkbox" aria-label="close sidebar" class="drawer-overlay"></label>
+      <div class="p-4 w-full h-auto max-h-[90vh] overflow-y-auto bg-base-100 text-base-content rounded-t-2xl flex flex-col">
+          <!-- Drawer Header -->
+          <div class="flex flex-row-reverse justify-between items-center mb-4 pb-2 border-b border-base-200">
+              <h2 class="text-lg font-semibold">افزودن تولد جدید</h2>
+              <button onclick="document.getElementById('drawer-checkbox').checked = false;" class="btn btn-sm btn-circle btn-ghost">
+                  <i class="fas fa-times"></i>
+              </button>
+          </div>
+          <!-- Form -->
+          <form id="birthdayForm" class="flex-grow">
+              <div class="mb-4">
+                  <label for="name" class="label">
+                      <span class="label-text">نام دوست</span>
+                  </label>
+                  <input type="text" id="name" placeholder="نام دوست را وارد کنید" required class="input input-bordered w-full text-right" />
+              </div>
+
+              <div class="mb-4">
+                  <label class="label">
+                      <span class="label-text">تاریخ تولد</span>
+                  </label>
+                  <div class="flex gap-2">
+                      <select id="month" required class="select select-bordered flex-1">
+                          <option value="" disabled selected>ماه</option>
+                          <option value="1">فروردین</option>
+                          <option value="2">اردیبهشت</option>
+                          <option value="3">خرداد</option>
+                          <option value="4">تیر</option>
+                          <option value="5">مرداد</option>
+                          <option value="6">شهریور</option>
+                          <option value="7">مهر</option>
+                          <option value="8">آبان</option>
+                          <option value="9">آذر</option>
+                          <option value="10">دی</option>
+                          <option value="11">بهمن</option>
+                          <option value="12">اسفند</option>
+                      </select>
+                      <input type="number" id="day" min="1" max="31" placeholder="روز" required class="input input-bordered flex-1 text-right" />
+                  </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary w-full mt-6">
+                  <i class="fas fa-save"></i>
+                  ذخیره
+              </button>
+          </form>
+      </div>
     </div>
-    
-    <form id="birthdayForm">
-      <div class="mb-4">
-        <label for="name" class="block text-sm font-medium mb-1 text-right" style="color: var(--tg-theme-text-color);">نام دوست</label>
-        <input type="text" id="name" placeholder="نام دوست را وارد کنید" required 
-          class="w-full px-3 py-2 border rounded-lg focus:ring-2 text-right" style="border-color: var(--tg-theme-hint-color); color: var(--tg-theme-text-color); background-color: var(--tg-theme-bg-color);">
-      </div>
-      
-      <div class="mb-4">
-        <label for="month" class="block text-sm font-medium mb-1 text-right" style="color: var(--tg-theme-text-color);">تاریخ تولد</label>
-        <div class="flex gap-2">
-          <select id="month" required
-            class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 text-right" style="border-color: var(--tg-theme-hint-color); color: var(--tg-theme-text-color); background-color: var(--tg-theme-bg-color);">
-            <option value="" disabled selected>ماه</option>
-            <option value="1">فروردین</option>
-            <option value="2">اردیبهشت</option>
-            <option value="3">خرداد</option>
-            <option value="4">تیر</option>
-            <option value="5">مرداد</option>
-            <option value="6">شهریور</option>
-            <option value="7">مهر</option>
-            <option value="8">آبان</option>
-            <option value="9">آذر</option>
-            <option value="10">دی</option>
-            <option value="11">بهمن</option>
-            <option value="12">اسفند</option>
-          </select>
-          <input type="number" id="day" min="1" max="31" placeholder="روز" required
-            class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 text-right" style="border-color: var(--tg-theme-hint-color); color: var(--tg-theme-text-color); background-color: var(--tg-theme-bg-color);">
-        </div>
-      </div>
-      
-      <button type="submit" class="w-full py-3 px-4 rounded-lg font-medium mt-4 flex items-center justify-center gap-2" 
-        style="background-color: var(--tg-theme-button-color); color: var(--tg-theme-button-text-color);">
-        <i class="fas fa-save"></i>
-        ذخیره
-      </button>
-    </form>
   </div>
+
 
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
-    
-    // Apply Telegram theme colors
-    document.body.style.backgroundColor = tg.themeParams.bg_color || 'var(--tg-theme-bg-color)';
-    document.body.style.color = tg.themeParams.text_color || 'var(--tg-theme-text-color)';
+    try {
+        tg.requestFullscreen();
+    } catch (e) {
+        console.warn("Fullscreen request failed:", e);
+    }
     
     const userId = tg.initDataUnsafe?.user?.id;
-    const statusEl = document.getElementById("status");
     const birthdaysList = document.getElementById("birthdaysList");
     const addButton = document.getElementById("addButton");
-    const drawer = document.getElementById("drawer");
-    const backdrop = document.getElementById("backdrop");
-    const closeDrawer = document.getElementById("closeDrawer");
+    const drawerCheckbox = document.getElementById("drawer-checkbox");
     const birthdayForm = document.getElementById("birthdayForm");
-    const notification = document.getElementById("notification");
-    const notificationMessage = document.getElementById("notificationMessage");
+    const notificationContainer = document.getElementById("notification-container");
     
     // Persian month names
     const persianMonths = [
-      "فروردین", "اردیبهشت", "خرداد", 
-      "تیر", "مرداد", "شهریور", 
-      "مهر", "آبان", "آذر", 
-      "دی", "بهمن", "اسفند"
+      "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور", 
+      "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
     ];
-    
-    // Get current Persian month (approximation)
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-11
     
     // Check for existing birthdays on startup
     checkExistingBirthdays();
     
     if (!userId) {
-      showNotification("❌ امکان شناسایی کاربر تلگرام وجود ندارد", "error");
+      showNotification("امکان شناسایی کاربر تلگرام وجود ندارد", "alert-error");
     }
     
     // Toggle drawer
     addButton.addEventListener("click", () => {
-      drawer.classList.add("open");
-      backdrop.classList.add("open");
+      drawerCheckbox.checked = true;
     });
     
-    closeDrawer.addEventListener("click", closeTheDrawer);
-    backdrop.addEventListener("click", closeTheDrawer);
-    
     function closeTheDrawer() {
-      drawer.classList.remove("open");
-      backdrop.classList.remove("open");
+      drawerCheckbox.checked = false;
     }
     
     // Handle form submission
@@ -401,52 +206,53 @@
       const day = document.getElementById("day").value;
       
       if (!name || !month || !day) {
-        showNotification("لطفا تمام فیلدها را پر کنید", "error");
+        showNotification("لطفا تمام فیلدها را پر کنید", "alert-warning");
         return;
       }
       
       if (day < 1 || day > 31) {
-        showNotification("لطفا روز معتبر وارد کنید (1-31)", "error");
+        showNotification("لطفا روز معتبر وارد کنید (1-31)", "alert-warning");
         return;
       }
       
-      const birthday = `${month.padStart(2, '0')}/${day.padStart(2, '0')}`;
+      const birthday = `${String(month).padStart(2, '0')}/${String(day).padStart(2, '0')}`;
       
       try {
         const response = await fetch("https://tavalodam-yadet-nare.milaadfarzian.workers.dev/api/add", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user_id: userId.toString(),
-            name,
-            birthday
-          })
+          body: JSON.stringify({ user_id: userId.toString(), name, birthday })
         });
         
         const data = await response.json();
         
         if (response.ok) {
-          showNotification(`✅ تولد ${name} با موفقیت اضافه شد`, "success");
+          showNotification(`تولد ${name} با موفقیت اضافه شد`, "alert-success");
           birthdayForm.reset();
           closeTheDrawer();
           checkExistingBirthdays();
         } else {
-          showNotification(`❌ خطا: ${data.error || "خطای ناشناخته"}`, "error");
+          showNotification(`خطا: ${data.error || "خطای ناشناخته"}`, "alert-error");
         }
       } catch (error) {
-        showNotification("❌ خطای شبکه. لطفا دوباره تلاش کنید.", "error");
+        showNotification("خطای شبکه. لطفا دوباره تلاش کنید.", "alert-error");
         console.error(error);
       }
     });
     
     function showNotification(message, type) {
-      notification.className = `notification ${type}`;
-      notificationMessage.textContent = message;
-      notification.classList.add('show');
-      
-      setTimeout(() => {
-        notification.classList.remove('show');
-      }, 3000);
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert ${type} shadow-lg`;
+        alertDiv.innerHTML = `<span>${message}</span>`;
+        notificationContainer.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.style.opacity = '0';
+            alertDiv.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 500);
+        }, 3000);
     }
     
     async function checkExistingBirthdays() {
@@ -457,7 +263,6 @@
         
         if (response.ok) {
           const data = await response.json();
-          
           if (data.reminders && data.reminders.length > 0) {
             renderBirthdays(data.reminders);
           } else {
@@ -475,9 +280,7 @@
     function renderBirthdays(birthdays) {
       birthdaysList.innerHTML = '';
       
-      // Group birthdays by month
       const birthdaysByMonth = {};
-      
       birthdays.forEach(bday => {
         const month = parseInt(bday.birthday.split('/')[0]);
         if (!birthdaysByMonth[month]) {
@@ -486,50 +289,40 @@
         birthdaysByMonth[month].push(bday);
       });
       
-      // Sort months in order
-      const sortedMonths = Object.keys(birthdaysByMonth)
-        .map(m => parseInt(m))
-        .sort((a, b) => a - b);
+      const sortedMonths = Object.keys(birthdaysByMonth).map(m => parseInt(m)).sort((a, b) => a - b);
       
-      // Create month sections
+      // Get current Persian month (simple approximation)
+      const currentJalaliMonth = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { month: 'numeric' }).format(new Date());
+
       sortedMonths.forEach(monthNum => {
         const monthBirthdays = birthdaysByMonth[monthNum];
         const monthName = persianMonths[monthNum - 1];
-        const isCurrentMonth = monthNum === currentMonth;
+        const isCurrentMonth = monthNum == currentJalaliMonth;
         
         const monthSection = document.createElement('div');
-        monthSection.className = 'month-section';
+        monthSection.className = `collapse collapse-arrow bg-base-200 ${isCurrentMonth ? 'border-2 border-primary' : ''}`;
+        
+        // Open current month by default
+        if (isCurrentMonth) {
+            monthSection.setAttribute('open', '');
+        }
+
         monthSection.innerHTML = `
-          <div class="month-header ${isCurrentMonth ? 'current-month' : ''}" data-month="${monthNum}">
-            <div class="flex items-center">
-              <span>${monthName}</span>
-              <span class="month-badge mr-2">${monthBirthdays.length}</span>
-            </div>
-            <div class="flex items-center">
-              <span class="text-xs" style="color: var(--tg-theme-hint-color);">
-                ${isCurrentMonth ? 'این ماه' : ''}
-              </span>
-              <i class="fas fa-chevron-down transition-transform ml-2"></i>
+          <div class="collapse-title text-lg font-medium">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span>${monthName}</span>
+                    <div class="badge badge-primary badge-outline">${monthBirthdays.length}</div>
+                </div>
+                ${isCurrentMonth ? '<span class="badge badge-primary text-xs">این ماه</span>' : ''}
             </div>
           </div>
-          <div class="month-content">
+          <div class="collapse-content !p-0">
             ${monthBirthdays.map(bday => createBirthdayCard(bday)).join('')}
           </div>
         `;
         
         birthdaysList.appendChild(monthSection);
-      });
-      
-      // Add event listeners to month headers
-      document.querySelectorAll('.month-header').forEach(header => {
-        header.addEventListener('click', () => {
-          const content = header.nextElementSibling;
-          const icon = header.querySelector('.fa-chevron-down');
-          
-          content.classList.toggle('open');
-          icon.classList.toggle('fa-chevron-down');
-          icon.classList.toggle('fa-chevron-up');
-        });
       });
       
       // Add event listeners to delete buttons
@@ -540,24 +333,22 @@
           const card = e.currentTarget.closest('.birthday-card');
           
           try {
-            const response = await fetch(`https://tavalodam-yadet-nare.milaadfarzian.workers.dev/api/delete/${userId}/${index}`, {
-              method: 'DELETE'
-            });
+            const response = await fetch(`https://tavalodam-yadet-nare.milaadfarzian.workers.dev/api/delete/${userId}/${index}`, { method: 'DELETE' });
             
             if (response.ok) {
-              showNotification("تولد با موفقیت حذف شد", "success");
-              // Fade out animation
+              showNotification("تولد با موفقیت حذف شد", "alert-info");
               card.style.opacity = '0';
               card.style.transform = 'translateX(20px)';
+              card.style.transition = 'all 0.3s ease';
               setTimeout(() => {
-                checkExistingBirthdays();
+                checkExistingBirthdays(); // Re-render the list
               }, 300);
             } else {
-              showNotification("حذف تولد با خطا مواجه شد", "error");
+              showNotification("حذف تولد با خطا مواجه شد", "alert-error");
             }
           } catch (error) {
             console.error("Delete error:", error);
-            showNotification("خطای شبکه. لطفا دوباره تلاش کنید.", "error");
+            showNotification("خطای شبکه. لطفا دوباره تلاش کنید.", "alert-error");
           }
         });
       });
@@ -569,36 +360,38 @@
       const isToday = bday.days_remaining === 0;
       
       return `
-        <div class="birthday-card">
-          <div class="birthday-avatar">
-            <i class="fas fa-birthday-cake"></i>
-          </div>
-          <div class="birthday-info">
-            <div class="flex items-center">
-              <h3 class="text-sm font-medium">${bday.name}</h3>
-              ${isToday ? '<span class="today-badge">امروز</span>' : ''}
+        <div class="birthday-card flex items-center p-3 border-t border-base-300/50 bg-base-100">
+            <div class="avatar placeholder mr-3">
+              <div class="bg-primary/10 text-primary rounded-full w-10">
+                <i class="fas fa-birthday-cake"></i>
+              </div>
             </div>
-            <div class="birthday-date">
-              ${day} ${monthName}
-              ${!isToday ? `<span class="days-remaining">${bday.days_remaining} روز باقی مانده</span>` : ''}
+            <div class="flex-grow">
+                <div class="flex items-center gap-2">
+                    <h3 class="font-medium">${bday.name}</h3>
+                    ${isToday ? '<div class="badge badge-success badge-sm">امروز</div>' : ''}
+                </div>
+                <div class="text-xs text-base-content/60 flex items-center gap-2 mt-1">
+                    <span>${day} ${monthName}</span>
+                    ${!isToday && bday.days_remaining != null ? `<div class="badge badge-ghost badge-sm">${bday.days_remaining} روز باقی مانده</div>` : ''}
+                </div>
             </div>
-          </div>
-          <div class="birthday-actions">
-            <div class="btn-icon btn-delete" data-index="${bday.index}">
-              <i class="fas fa-trash"></i>
+            <div class="birthday-actions">
+                <button class="btn btn-ghost btn-sm btn-circle text-error/70 btn-delete" data-index="${bday.index}">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
-          </div>
         </div>
       `;
     }
     
     function renderEmptyState() {
       birthdaysList.innerHTML = `
-        <div class="py-8 text-center empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="color: var(--tg-theme-hint-color);">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p class="mt-2">هنوز تولدی اضافه نکرده‌اید</p>
+        <div class="py-12 text-center text-base-content/50">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p class="mt-2 text-sm">هنوز تولدی اضافه نکرده‌اید</p>
         </div>
       `;
     }
