@@ -142,6 +142,7 @@
     function populateMonthSelector() {
         persianMonths.forEach((monthName, index) => {
             const button = document.createElement('button');
+            button.type = 'button'; // ✨ FIX: Explicitly set button type
             button.className = 'btn';
             button.textContent = monthName;
             button.dataset.monthValue = index + 1;
