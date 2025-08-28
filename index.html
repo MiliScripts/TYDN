@@ -5,10 +5,9 @@
   <title>یادآور تولد دوستان</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- DaisyUI -->
+  <!-- Tailwind CSS & DaisyUI -->
   <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
@@ -21,29 +20,6 @@
 
     body {
       font-family: 'Vazir', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    /* Drawer animation styles */
-    .drawer-side {
-      transform: translateY(100%);
-      transition: transform 0.3s ease-out;
-      will-change: transform;
-    }
-
-    .drawer-open .drawer-side {
-      transform: translateY(0);
-    }
-    
-    .drawer-overlay {
-      background-color: rgba(0, 0, 0, 0.5);
-      opacity: 0;
-      transition: opacity 0.3s ease-out;
-      pointer-events: none;
-    }
-
-    .drawer-open .drawer-overlay {
-      opacity: 1;
-      pointer-events: auto;
     }
 
     /* Custom scrollbar for better aesthetics */
@@ -61,20 +37,12 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(0, 0, 0, 0.3);
     }
-
-    /* Additional style to make collapse icon smoother */
-    .collapse-title .fa-chevron-down {
-        transition: transform 0.2s ease-in-out;
-    }
-    .collapse-open .collapse-title .fa-chevron-down {
-        transform: rotate(180deg);
-    }
-
   </style>
 </head>
 <body class="bg-base-100 text-base-content">
   <div class="max-w-md mx-auto pb-24">
-    <div class="px-4 py-3 sticky top-0 z-10 bg-base-100/80 backdrop-blur-sm border-b border-base-200">
+    <!-- Header with increased top margin -->
+    <div class="px-4 pt-8 pb-3 sticky top-0 z-10 bg-base-100/80 backdrop-blur-sm border-b border-base-200">
       <h1 class="text-xl font-semibold text-right">یادآور تولد دوستان</h1>
     </div>
 
@@ -89,12 +57,13 @@
     </div>
 
     <!-- Floating Add Button -->
-    <div class="fixed bottom-0 left-0 right-0 p-4 bg-transparent">
+    <div class="fixed bottom-0 left-0 right-0 p-4 bg-transparent z-20">
        <div class="max-w-md mx-auto">
-          <button id="addButton" class="btn btn-primary w-full shadow-lg">
+          <!-- The button is now a label for the drawer checkbox -->
+          <label for="drawer-checkbox" id="addButton" class="btn btn-primary w-full shadow-lg">
             <i class="fas fa-plus"></i>
             افزودن تولد
-          </button>
+          </label>
        </div>
     </div>
   </div>
@@ -103,22 +72,24 @@
   <div id="notification-container" class="toast toast-bottom toast-center z-50"></div>
 
   <!-- Drawer (Add Birthday Form) -->
-  <div id="addBirthdayDrawer" class="drawer drawer-bottom h-auto z-40">
+  <div class="drawer drawer-bottom h-auto z-40">
     <input id="drawer-checkbox" type="checkbox" class="drawer-toggle" />
+    <!-- Drawer content -->
     <div class="drawer-side">
       <label for="drawer-checkbox" aria-label="close sidebar" class="drawer-overlay"></label>
       <div class="p-4 w-full h-auto max-h-[90vh] overflow-y-auto bg-base-100 text-base-content rounded-t-2xl flex flex-col">
           <!-- Drawer Header -->
           <div class="flex flex-row-reverse justify-between items-center mb-4 pb-2 border-b border-base-200">
               <h2 class="text-lg font-semibold">افزودن تولد جدید</h2>
-              <button onclick="document.getElementById('drawer-checkbox').checked = false;" class="btn btn-sm btn-circle btn-ghost">
+              <!-- This button is a label that closes the drawer by unchecking the box -->
+              <label for="drawer-checkbox" class="btn btn-sm btn-circle btn-ghost">
                   <i class="fas fa-times"></i>
-              </button>
+              </label>
           </div>
           <!-- Form -->
           <form id="birthdayForm" class="flex-grow">
               <div class="mb-4">
-                  <label for="name" class="label">
+                  <label class="label">
                       <span class="label-text">نام دوست</span>
                   </label>
                   <input type="text" id="name" placeholder="نام دوست را وارد کنید" required class="input input-bordered w-full text-right" />
@@ -163,14 +134,15 @@
     tg.ready();
     tg.expand();
     try {
-        tg.requestFullscreen();
+        if (tg.isVersionAtLeast('6.4')) {
+            tg.requestFullscreen();
+        }
     } catch (e) {
         console.warn("Fullscreen request failed:", e);
     }
     
     const userId = tg.initDataUnsafe?.user?.id;
     const birthdaysList = document.getElementById("birthdaysList");
-    const addButton = document.getElementById("addButton");
     const drawerCheckbox = document.getElementById("drawer-checkbox");
     const birthdayForm = document.getElementById("birthdayForm");
     const notificationContainer = document.getElementById("notification-container");
@@ -187,11 +159,6 @@
     if (!userId) {
       showNotification("امکان شناسایی کاربر تلگرام وجود ندارد", "alert-error");
     }
-    
-    // Toggle drawer
-    addButton.addEventListener("click", () => {
-      drawerCheckbox.checked = true;
-    });
     
     function closeTheDrawer() {
       drawerCheckbox.checked = false;
@@ -242,13 +209,12 @@
     
     function showNotification(message, type) {
         const alertDiv = document.createElement('div');
-        alertDiv.className = `alert ${type} shadow-lg`;
+        alertDiv.className = `alert ${type} shadow-lg animate-fade-in-up`;
         alertDiv.innerHTML = `<span>${message}</span>`;
         notificationContainer.appendChild(alertDiv);
 
         setTimeout(() => {
-            alertDiv.style.opacity = '0';
-            alertDiv.style.transition = 'opacity 0.5s ease';
+            alertDiv.classList.add('animate-fade-out-down');
             setTimeout(() => {
                 alertDiv.remove();
             }, 500);
@@ -291,7 +257,7 @@
       
       const sortedMonths = Object.keys(birthdaysByMonth).map(m => parseInt(m)).sort((a, b) => a - b);
       
-      // Get current Persian month (simple approximation)
+      // Get current Persian month
       const currentJalaliMonth = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { month: 'numeric' }).format(new Date());
 
       sortedMonths.forEach(monthNum => {
@@ -300,14 +266,11 @@
         const isCurrentMonth = monthNum == currentJalaliMonth;
         
         const monthSection = document.createElement('div');
-        monthSection.className = `collapse collapse-arrow bg-base-200 ${isCurrentMonth ? 'border-2 border-primary' : ''}`;
+        // REVISED COLLAPSE STRUCTURE
+        monthSection.className = `collapse collapse-arrow bg-base-200 ${isCurrentMonth ? 'border border-primary' : ''}`;
         
-        // Open current month by default
-        if (isCurrentMonth) {
-            monthSection.setAttribute('open', '');
-        }
-
         monthSection.innerHTML = `
+          <input type="checkbox" ${isCurrentMonth ? 'checked' : ''} /> 
           <div class="collapse-title text-lg font-medium">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -317,7 +280,7 @@
                 ${isCurrentMonth ? '<span class="badge badge-primary text-xs">این ماه</span>' : ''}
             </div>
           </div>
-          <div class="collapse-content !p-0">
+          <div class="collapse-content !p-0 bg-base-100">
             ${monthBirthdays.map(bday => createBirthdayCard(bday)).join('')}
           </div>
         `;
@@ -360,7 +323,7 @@
       const isToday = bday.days_remaining === 0;
       
       return `
-        <div class="birthday-card flex items-center p-3 border-t border-base-300/50 bg-base-100">
+        <div class="birthday-card flex items-center p-3 border-t border-base-200">
             <div class="avatar placeholder mr-3">
               <div class="bg-primary/10 text-primary rounded-full w-10">
                 <i class="fas fa-birthday-cake"></i>
